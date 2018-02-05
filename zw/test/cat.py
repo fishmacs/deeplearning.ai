@@ -46,10 +46,10 @@ if __name__ == '__main__':
     train_x = train_x.reshape(train_x.shape[0], -1).T / 255
     test_x = test_x.reshape(test_x.shape[0], -1).T / 255
     model = two_layer(train_x, train_y)
-    p = model.predict(train_x, train_y)
+    p = model.predict(train_x)
     m = train_x.shape[1]
     print('Accuracy of train set: %f' % np.sum(p == train_y) / m)
 
-    p = model.predict(test_x, test_y)
+    p = model.predict(test_x)
     m = test_x.shape[1]
     print('Accuracy of train set: %f' % np.sum(p == test_y) / m)
