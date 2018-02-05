@@ -15,9 +15,9 @@ def sigmoid_backward(da, z):
 
 
 def relu_backward(da, z):
-    dz = np.array(da, copy=True)
-    dz[z <= 0] = 0
-    return dz
+    # dz = np.array(da, copy=True)
+    # dz[z <= 0] = 0
+    return da * np.int64(z > 0)
 
 
 def tanh_backward(da, z):
