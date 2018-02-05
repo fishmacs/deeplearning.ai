@@ -33,6 +33,20 @@ def test_initialize():
     assert_eq(nn.b[1], [[0.], [0.], [0.]])
 
 
+def test_initialize_he():
+    np.random.seed(3)
+    nn = NeuralNetwork(layer_dims=[2, 4, 1], weight_factor='he')
+    assert_eq(nn.w[0], [
+        [1.78862847, 0.43650985],
+        [0.09649747, -1.8634927],
+        [-0.2773882, -0.35475898],
+        [-0.08274148, -0.62700068]
+    ], rtol=1e-5)
+    assert_eq(nn.w[1], [
+        [-0.03098412, -0.33744411, -0.92904268, 0.62552248]
+    ], rtol=1e-5)
+
+
 def test_linear_activate_forward():
     np.random.seed(2)
     a_prev = np.random.randn(3, 2)
