@@ -23,50 +23,57 @@ class NeuralNetwork:
 
     def __init__(self, **kargs):
         self.params = kargs
+        if kargs.get('params_ok'):
+            self.finish_params()
 
     def __getattr__(self, key):
         if key in self.params:
             return self.params[key]
         return None
 
-    def init_params(self, params):
-        self.w = params.get('w')
-        self.b = params.get('b')
-
-        layer_dims = params.get('layer_dims')
-        if layer_dims:
-            self.layer_num = len(layer_dims) - 1
+    def finish_params(self, x=None):
+        if self.layer_dims:
+            if x:
+                self.layer_dims = [x.shape[0]] + self.layer_dims
+            self.layer_num = len(self.layer_dims) - 1
         else:
             self.layer_num = len(self.w) or len(self.b)
         if not self.layer_num:
-            raise Exception('Invalid arguments: ' % params)
+            raise Exception('Invalid arguments, can not decide layer_num')
 
-        weight_factor = params.get('weight_factor', 0.01)
-        if self.w is None:
-            self.w = [initial_weights(layer_dims[i + 1], layer_dims[i], weight_factor) for i in range(self.layer_num)]
-        if self.b is None:
-            self.b = [np.zeros((layer_dims[i + 1], 1)) for i in range(self.layer_num)]
+        if not self.weight_factor:
+            self.weight_factor = 0.01
 
-        if 'activations' in params:
-            avs = params['activations']
-        else:
-            avs = ['relu'] * (self.layer_num - 1) + ['sigmoid']
-        self.acfuncs = [self.activation_funcs[a] for a in avs]
+        if not self.w:
+            self.w = [initial_weights(self.layer_dims[i + 1], self.layer_dims[i], self.weight_factor) for i in range(self.layer_num)]
+        if not self.b:
+            self.b = [np.zeros((self.layer_dims[i + 1], 1)) for i in range(self.layer_num)]
+
+        if not self.activations:
+            self.activations = ['relu'] * (self.layer_num - 1) + ['sigmoid']
+        self.acfuncs = [self.activation_funcs[a] for a in self.activations]
 
         self.cache = []
-        self.learning_rate = params.get('learning_rate', 0.0075)
-        self.lambd = params.get('lambd', 0)
+
+        if not self.learning_rate:
+            self.learning_rate = 0.0075
+
+        if self.lambd is None:
+            self.lambd = 0
+
+        if not self.keep_prop:
+            self.keep_prop = 1
 
     def train(self, x, y, **kargs):  # learning_rate=0.0075, num_iterations=3000, callback=None, lambd=0, keep_prop=1.)
         self.params.update(kargs)
-        self.init_params(self.params)
-        self.learning_rate = learning_rate
-        self.lambd = lambd
-        for i in range(0, num_iterations):
-            al = self.model_forward(x, keep_prop)
-            if callback:
-                callback(i + 1, self.compute_cost(al, y))
-            grads = self.model_backward(al, y, keep_prop)
+        self.check_params(x)
+        # self.learning_rate = learning_rate
+        # self.lambd = lambd
+        for i in range(0, self.num_iterations):
+            al = self.model_forward(x, self.keep_prop)
+            if self.callback:
+                self.callback(i + 1, self.compute_cost(al, y))
+            grads = self.model_backward(al, y, self.keep_prop)
             self.update_parameters(grads)
 
     def predict(self, x):

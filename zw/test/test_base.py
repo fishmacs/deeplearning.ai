@@ -6,7 +6,7 @@ from zw.neuralnetwork import NeuralNetwork
 
 def test_initialize():
     np.random.seed(1)
-    nn = NeuralNetwork(layer_dims=[3, 2, 1])
+    nn = NeuralNetwork(layer_dims=[3, 2, 1], params_ok=True)
     assert_eq(nn.w[0], [
         [0.01624345, -0.00611756, -0.00528172],
         [-0.01072969, 0.00865408, -0.02301539]
@@ -17,7 +17,7 @@ def test_initialize():
     assert_eq(nn.b[1], [[0.]])
 
     np.random.seed(3)
-    nn = NeuralNetwork(layer_dims=[5, 4, 3])
+    nn = NeuralNetwork(layer_dims=[5, 4, 3], params_ok=True)
     assert_eq(nn.w[0], [
         [0.01788628, 0.0043651, 0.00096497, -0.01863493, -0.00277388],
         [-0.00354759, -0.00082741, -0.00627001, -0.00043818, -0.00477218],
@@ -35,7 +35,7 @@ def test_initialize():
 
 def test_initialize_he():
     np.random.seed(3)
-    nn = NeuralNetwork(layer_dims=[2, 4, 1], weight_factor='he')
+    nn = NeuralNetwork(layer_dims=[2, 4, 1], weight_factor='he', params_ok=True)
     assert_eq(nn.w[0], [
         [1.78862847, 0.43650985],
         [0.09649747, -1.8634927],
@@ -53,11 +53,11 @@ def test_linear_activate_forward():
     w = np.random.randn(1, 3)
     b = np.random.randn(1, 1)
 
-    nn = NeuralNetwork(w=[w], b=[b])
+    nn = NeuralNetwork(w=[w], b=[b], params_ok=True)
     a = nn.forward(a_prev, w, b, nn.activation_funcs['sigmoid'][0])
     assert_eq(a, [[0.96890023, 0.11013289]])
 
-    nn = NeuralNetwork(w=w, b=b)
+    nn = NeuralNetwork(w=[w], b=[b], params_ok=True)
     a = nn.forward(a_prev, w, b, nn.activation_funcs['relu'][0])
     assert_eq(a, [[3.43896131, 0.]])
 
@@ -72,7 +72,7 @@ def test_model_forward():
     w3 = np.random.randn(1, 3)
     b3 = np.random.randn(1, 1)
 
-    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3])
+    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], params_ok=True)
     al = nn.model_forward(x)
     nt.eq_(len(nn.cache), 3)
     assert_eq(al, [[0.03921668, 0.70498921, 0.19734387, 0.04728177]])
@@ -82,7 +82,7 @@ def test_compute_cost():
     y = np.asarray([[1, 1, 1]])
     al = np.array([[.8, .9, 0.4]])
 
-    nn = NeuralNetwork(layer_dims=(3, 1))
+    nn = NeuralNetwork(layer_dims=(3, 1), params_ok=True)
     cost = nn.compute_cost(al, y)
     assert_eq(cost, 0.41493159961539694)
 
@@ -95,7 +95,7 @@ def test_linear_activate_backward():
     b = np.random.randn(1, 1)
     z = np.random.randn(1, 2)
 
-    nn = NeuralNetwork(w=[w], b=[b])
+    nn = NeuralNetwork(w=[w], b=[b], params_ok=True)
     da_prev, dw, db = nn.backward(da, w, b, (a, z), nn.activation_funcs['sigmoid'][1])
     assert_eq(da_prev, [
         [0.110179936, 0.011053395],
@@ -106,7 +106,7 @@ def test_linear_activate_backward():
     nt.eq_(db.shape, (1, 1))
     assert_eq(db, -0.057296222)
 
-    nn = NeuralNetwork(w=[w], b=[b])
+    nn = NeuralNetwork(w=[w], b=[b], params_ok=True)
     da_prev, dw, db = nn.backward(da, w, b, (a, z), nn.activation_funcs['relu'][1])
     assert_eq(da_prev, [
         [0.44090989, 0.],
@@ -133,7 +133,7 @@ def test_model_backward():
     b2 = np.random.randn(1, 1)
     z2 = np.random.randn(1, 2)
 
-    nn = NeuralNetwork(w=[w1, w2], b=[b1, b2])
+    nn = NeuralNetwork(w=[w1, w2], b=[b1, b2], params_ok=True)
     nn.cache = [(a1, z1), (a2, z2)]
     nn.w = [w1, w2]
     nn.b = [b1, b2]
@@ -161,7 +161,8 @@ def test_update_parameters():
     db1 = np.random.randn(3, 1)
     dw2 = np.random.randn(1, 3)
     db2 = np.random.randn(1, 1)
-    nn = NeuralNetwork(w=[w1, w2], b=[b1, b2], learning_rate=0.1)
+
+    nn = NeuralNetwork(w=[w1, w2], b=[b1, b2], learning_rate=0.1, params_ok=True)
 
     nn.update_parameters(([dw1, dw2], [db1, db2]))
 

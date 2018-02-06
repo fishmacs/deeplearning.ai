@@ -16,7 +16,7 @@ def test_cost_regulation():
     b3 = np.random.randn(1, 1)
     a3 = np.array([[0.40682402, 0.01629284, 0.16722898, 0.10118111, 0.40682402]])
 
-    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], lambd=0.1)
+    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], lambd=0.1, params_ok=True)
     cost = nn.compute_cost(a3, y)
     assert_eq(cost, 1.78648594516)
 
@@ -65,7 +65,7 @@ def test_backward_propagation_regulation():
     z3 = np.array([[-0.3771104, -4.10060224, -1.60539468, -2.18416951, -0.3771104]])
     a3 = np.array([[0.40682402, 0.01629284, 0.16722898, 0.10118111, 0.40682402]])
 
-    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], lambd=0.7)
+    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], lambd=0.7, params_ok=True)
     nn.cache = [(x, z1), (a1, z2), (a2, z3)]
     gradw, gradb = nn.model_backward(a3, y)
 
@@ -92,7 +92,7 @@ def test_forward_propagation_dropout():
     b3 = np.random.randn(1, 1)
 
     np.random.seed(1)
-    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3])
+    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], params_ok=True)
     a3 = nn.model_forward(x, keep_prop=0.7)
     assert_eq(a3, [[0.36974721, 0.00305176, 0.04565099, 0.49683389, 0.36974721]], rtol=1e-5)
 
@@ -119,7 +119,7 @@ def test_backward_propagation_dropout():
     w3 = np.array([[-0.6871727, -0.84520564, -0.67124613]])
     b3 = np.array([[-0.0126646]])
 
-    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3])
+    nn = NeuralNetwork(w=[w1, w2, w3], b=[b1, b2, b3], params_ok=True)
 
     z1 = np.array([
         [-1.52855314, 3.32524635, 2.13994541, 2.60700654, -0.75942115],
