@@ -26,8 +26,7 @@ def load_data():
 
 
 def train(train_x, train_y, layers):
-    layer_dims = [train_x.shape[0]] + layers
-    nn = NeuralNetwork(layer_dims=layer_dims)
+    nn = NeuralNetwork(layer_dims=layers)
 
     def print_cost(iteration_num, cost):
         if iteration_num % 100 == 0:

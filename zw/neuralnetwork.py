@@ -33,7 +33,7 @@ class NeuralNetwork:
 
     def finish_params(self, x=None):
         if self.layer_dims:
-            if x:
+            if x is not None:
                 self.layer_dims = [x.shape[0]] + self.layer_dims
             self.layer_num = len(self.layer_dims) - 1
         else:
@@ -62,11 +62,11 @@ class NeuralNetwork:
             self.lambd = 0
 
         if not self.keep_prop:
-            self.keep_prop = 1
+            self.keep_prop = [1] * self.layer_num
 
     def train(self, x, y, **kargs):  # learning_rate=0.0075, num_iterations=3000, callback=None, lambd=0, keep_prop=1.)
         self.params.update(kargs)
-        self.check_params(x)
+        self.finish_params(x)
         # self.learning_rate = learning_rate
         # self.lambd = lambd
         for i in range(0, self.num_iterations):
