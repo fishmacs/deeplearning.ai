@@ -26,7 +26,7 @@ def load_data():
 
 
 def train(train_x, train_y, layers):
-    nn = NeuralNetwork(layer_dims=layers)
+    nn = NeuralNetwork(layer_dims=layers, weight_factor=len(layers)>2 and 'deep' or 0.01)
 
     def print_cost(iteration_num, cost):
         if iteration_num % 100 == 0:

@@ -7,6 +7,8 @@ def initial_weights(units, last_units, weight_factor):
     w = np.random.randn(units, last_units)
     if isinstance(weight_factor, float):
         w *= weight_factor
+    elif weight_factor == 'deep':
+        w /= np.sqrt(last_units)
     elif weight_factor == 'he':
         w *= np.sqrt(2 / last_units)
     else:
