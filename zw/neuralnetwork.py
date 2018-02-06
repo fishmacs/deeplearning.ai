@@ -22,34 +22,44 @@ class NeuralNetwork:
     }
 
     def __init__(self, **kargs):
-        self.w = kargs.get('w')
-        self.b = kargs.get('b')
+        self.params = kargs
 
-        layer_dims = kargs.get('layer_dims')
+    def __getattr__(self, key):
+        if key in self.params:
+            return self.params[key]
+        return None
+
+    def init_params(self, params):
+        self.w = params.get('w')
+        self.b = params.get('b')
+
+        layer_dims = params.get('layer_dims')
         if layer_dims:
             self.layer_num = len(layer_dims) - 1
         else:
             self.layer_num = len(self.w) or len(self.b)
         if not self.layer_num:
-            raise Exception('Invalid arguments: ' % kargs)
+            raise Exception('Invalid arguments: ' % params)
 
-        weight_factor = kargs.get('weight_factor', 0.01)
+        weight_factor = params.get('weight_factor', 0.01)
         if self.w is None:
             self.w = [initial_weights(layer_dims[i + 1], layer_dims[i], weight_factor) for i in range(self.layer_num)]
         if self.b is None:
             self.b = [np.zeros((layer_dims[i + 1], 1)) for i in range(self.layer_num)]
 
-        if 'activations' in kargs:
-            avs = kargs['activations']
+        if 'activations' in params:
+            avs = params['activations']
         else:
             avs = ['relu'] * (self.layer_num - 1) + ['sigmoid']
         self.acfuncs = [self.activation_funcs[a] for a in avs]
 
         self.cache = []
-        self.learning_rate = kargs.get('learning_rate', 0.0075)
-        self.lambd = kargs.get('lambd', 0)
+        self.learning_rate = params.get('learning_rate', 0.0075)
+        self.lambd = params.get('lambd', 0)
 
-    def train(self, x, y, learning_rate=0.0075, num_iterations=3000, callback=None, lambd=0, keep_prop=1.):
+    def train(self, x, y, **kargs):  # learning_rate=0.0075, num_iterations=3000, callback=None, lambd=0, keep_prop=1.)
+        self.params.update(kargs)
+        self.init_params(self.params)
         self.learning_rate = learning_rate
         self.lambd = lambd
         for i in range(0, num_iterations):
@@ -77,21 +87,34 @@ class NeuralNetwork:
     def model_forward(self, x, keep_prop=1.):
         self.cache = []
         a = x
-        for w, b, acfunc in zip(self.w, self.b, self.acfuncs):
-            a = self.forward(a, w, b, acfunc[0])
+        if isinstance(keep_prop, float):
+            keep_prop = [keep_prop] * self.layer_num
+            keep_prop[-1] = 1
+        for w, b, acfunc, keeprop in zip(self.w, self.b, self.acfuncs, keep_prop):
+            a = self.forward(a, w, b, acfunc[0], keeprop)
         return a
 
-    def forward(self, a_prev, w, b, acfunc):
+    def forward(self, a_prev, w, b, acfunc, keeprop=1):
         z = w.dot(a_prev) + b
-        self.cache.append((a_prev, z))
-        return acfunc(z)
+        cache = [a_prev, z]
+        a = acfunc(z)
+        if keeprop < 1:
+            d = np.random.rand(*a.shape) < keeprop
+            a *= d
+            a /= keeprop
+            cache.append(d)
+        self.cache.append(cache)
+        return a
 
     def model_backward(self, al, y, keep_prop=1.):
         grad_w, grad_b = [], []
         dal = -y / al + (1 - y) / (1 - al)
         da = dal
+        if isinstance(keep_prop, float):
+            keep_prop = [keep_prop] * self.layer_num
+            keep_prop[-1] = 1
         for i in reversed(range(self.layer_num)):
-            da_prev, dw, db = self.backward(da, self.w[i], self.b[i], self.cache[i], self.acfuncs[i][1])
+            da_prev, dw, db = self.backward(da, self.w[i], self.b[i], self.cache[i], self.acfuncs[i][1], keep_prop[i])
             da = da_prev
             grad_w.append(dw)
             grad_b.append(db)
@@ -99,8 +122,13 @@ class NeuralNetwork:
         grad_b.reverse()
         return grad_w, grad_b
 
-    def backward(self, da, w, b, cache, acfunc):
-        a_prev, z = cache
+    def backward(self, da, w, b, cache, acfunc, keeprop=1):
+        if keeprop < 1:
+            a_prev, z, d = cache
+            da *= d
+            da /= keeprop
+        else:
+            a_prev, z = cache
         dz = acfunc(da, z)
         m = a_prev.shape[1]
         dw = dz.dot(a_prev.T) / m
