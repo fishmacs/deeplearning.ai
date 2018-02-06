@@ -25,31 +25,33 @@ def load_data():
     return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
 
 
-def train(nn, train_x, train_y):
-    nn.train(train_x, train_y, keep_cost=True)
-
-
-def two_layer(train_x, train_y):
-    layer_dims = (train_x.shape[0], 7, 1)
+def train(train_x, train_y, layers):
+    layer_dims = [train_x.shape[0]] + layers
     nn = NeuralNetwork(layer_dims=layer_dims)
 
     def print_cost(iteration_num, cost):
         if iteration_num % 100 == 0:
             print("Cost after iteration %d: %f" % (iteration_num, cost))
 
-    nn.train(train_x, train_y, num_iterations=2000, callback=print_cost)
+    nn.train(train_x, train_y, num_iterations=2500, callback=print_cost)
     return nn
 
 
 if __name__ == '__main__':
+    np.random.seed(1)
+
+    import sys
+    layers = [int(n) for n in sys.argv[1:]]
+
     train_x, train_y, test_x, test_y, classes = load_data()
     train_x = train_x.reshape(train_x.shape[0], -1).T / 255
     test_x = test_x.reshape(test_x.shape[0], -1).T / 255
-    model = two_layer(train_x, train_y)
+
+    model = train(train_x, train_y, layers)
     p = model.predict(train_x)
     m = train_x.shape[1]
-    print('Accuracy of train set: %f' % np.sum(p == train_y) / m)
+    print('Accuracy of train set: %f' % (np.sum(p == train_y) / m))
 
     p = model.predict(test_x)
     m = test_x.shape[1]
-    print('Accuracy of train set: %f' % np.sum(p == test_y) / m)
+    print('Accuracy of test set: %f' % (np.sum(p == test_y) / m))
