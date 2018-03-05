@@ -9,11 +9,11 @@ base_dir = op.dirname(__file__)
 
 
 def load_data():
-    train_dataset = h5py.File(op.join(base_dir, 'train_catvnoncat.h5'), "r")
+    train_dataset = h5py.File(op.join(base_dir, 'dataset', 'train_catvnoncat.h5'), "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
 
-    test_dataset = h5py.File(op.join(base_dir, 'test_catvnoncat.h5'), "r")
+    test_dataset = h5py.File(op.join(base_dir, 'dataset', 'test_catvnoncat.h5'), "r")
     test_set_x_orig = np.array(test_dataset["test_set_x"][:]) # your test set features
     test_set_y_orig = np.array(test_dataset["test_set_y"][:]) # your test set labels
 
@@ -26,7 +26,7 @@ def load_data():
 
 
 def train(train_x, train_y, layers):
-    nn = NeuralNetwork(layer_dims=layers, weight_factor=len(layers)>2 and 'deep' or 0.01)
+    nn = NeuralNetwork(layer_dims=layers, keep_prop=0.8, weight_factor=len(layers)>2 and 'deep' or 0.01)
 
     def print_cost(iteration_num, cost):
         if iteration_num % 100 == 0:

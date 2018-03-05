@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 from zw.activation import sigmoid, sigmoid_backward, relu, relu_backward, tanh_backward
 
 
-def initial_weights(units, last_units, weight_factor):
-    w = np.random.randn(units, last_units)
+def initial_weights(units, prev_units, weight_factor):
+    w = np.random.randn(units, prev_units)
     if isinstance(weight_factor, float):
         w *= weight_factor
     elif weight_factor == 'deep':
-        w /= np.sqrt(last_units)
+        w /= np.sqrt(prev_units)
     elif weight_factor == 'he':
-        w *= np.sqrt(2 / last_units)
+        w *= np.sqrt(2 / prev_units)
     else:
         raise Exception('Unknown weight factor: ' + weight_factor)
     return w
@@ -87,8 +87,8 @@ class NeuralNetwork:
         self.b = [(bi - gi * self.learning_rate) for bi, gi in zip(self.b, grad_b)]
 
     def compute_cost(self, a, y):
-        cost = -np.sum(y * np.log(a) + (1 - y) * np.log(1 - a), axis=1) / a.shape[1]
         m = a.shape[1]
+        cost = -np.nansum(y * np.log(a) + (1 - y) * np.log(1 - a), axis=1) / m
         if self.lambd:
             cost += self.lambd * sum([np.sum(np.square(w)) for w in self.w]) / (2 * m)
         return np.squeeze(cost)

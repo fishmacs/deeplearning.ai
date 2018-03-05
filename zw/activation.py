@@ -20,5 +20,8 @@ def relu_backward(da, z):
     return da * np.int64(z > 0)
 
 
+tanh = np.tanh
+
+
 def tanh_backward(da, z):
     return da * (1 - np.square(np.tanh(z)))

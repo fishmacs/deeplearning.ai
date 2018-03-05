@@ -1,10 +1,13 @@
 import numpy as np
 from numpy.testing import assert_allclose as assert_eq
+from nose.tools import nottest
+
 from zw.neuralnetwork import NeuralNetwork
 
 np.set_printoptions(precision=10)
 
 
+@nottest
 def test_cost_regulation():
     np.random.seed(1)
     y = np.array([[1, 1, 0, 1, 0]])
@@ -21,6 +24,7 @@ def test_cost_regulation():
     assert_eq(cost, 1.78648594516)
 
 
+@nottest
 def test_backward_propagation_regulation():
     np.random.seed(1)
     x = np.random.randn(3, 5)
@@ -81,6 +85,7 @@ def test_backward_propagation_regulation():
     assert_eq(gradw[2], [[-1.77691347, -0.11832879, -0.09397446]], rtol=1e-5)
 
 
+@nottest
 def test_forward_propagation_dropout():
     np.random.seed(1)
     x = np.random.randn(3, 5)
@@ -97,6 +102,7 @@ def test_forward_propagation_dropout():
     assert_eq(a3, [[0.36974721, 0.00305176, 0.04565099, 0.49683389, 0.36974721]], rtol=1e-5)
 
 
+@nottest
 def test_backward_propagation_dropout():
     np.random.seed(1)
 
